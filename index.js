@@ -12,10 +12,10 @@ console.log(
 )
 
 var filesList = [];
-currentFolder('./')
+getFileList('./')
 
 
-function currentFolder(path) {
+function getFileList(path) {
   fs.readdir(path, (err, files) => {
     files.forEach(file => {
       filesList.push(file);
@@ -24,6 +24,30 @@ function currentFolder(path) {
       chooseAction()
     }
   });
+}
+
+function renameFiles() {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'getPath',
+        message: "Enter path or keep empty for current folder :",
+      },
+    ])
+    .then(answers => {
+      // --- W A R N I N G ---
+      // const workPath = answers.getPath === '' ? './' : answers.getPath
+      const workPath = answers.getPath
+      fs.readdir(workPath, (err, files) => {
+        files.forEach((file, index) => {
+          console.log(file);
+          fs.rename(workPath + `/${file}`, workPath + `/${file}` + `${index}`, (err) => {
+            if (err) throw err;
+          })
+        })
+      })
+    })
 }
 
 function chooseAction() {
@@ -38,26 +62,7 @@ function chooseAction() {
     ])
     .then(answers => {
       if (answers.action === 'Rename') {
-        inquirer
-          .prompt([
-            {
-              type: 'input',
-              name: 'getPath',
-              message: "Enter work folder:",
-            },
-          ])
-          .then(answers => {
-            fs.readdir(answers.getPath, (err, files) => {
-              files.forEach((file, index) => {
-                console.log(file);
-                // add regex for keep files extensions
-                // delete old name
-                fs.rename(answers.getPath + `/${file}`, answers.getPath + `/${file}` + `${index}`, (err) => {
-                  if (err) throw err;
-                })
-              })
-            })
-          })
+        renameFiles()
       }
     });
 }
