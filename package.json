@@ -4,7 +4,7 @@
   "description": "A node.js based files manager.",
   "main": "index.js",
   "scripts": {
-    "fm": "node"
+    "dev": "node ./index.js"
   },
   "repository": {
     "type": "git",
