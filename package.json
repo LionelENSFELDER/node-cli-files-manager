@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A node.js based files manager.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "node ./index.js"
   },
