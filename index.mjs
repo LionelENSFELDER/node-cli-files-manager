@@ -1,16 +1,13 @@
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 import * as readline from 'node:readline'
 import * as path from 'path'
-import { argv } from 'node:process'
-import * as chalk from 'chalk'
-import * as inquirer from 'chalk'
+import { argv, cwd } from 'node:process'
+import process from 'node:process'
 
-const readLine = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
-
+// TODO : gather globals in one place 
+const workDir = process.cwd()
 var filesList = [];
+var userArgv = {}
 
 function removeDuplicates(array) {
   return array.filter((item, index) => array.indexOf(item) === index);
@@ -42,64 +39,6 @@ function listMimeTypeInFolder(dir) {
   })
 }
 
-function getFileList(path) {
-  fs.readdir(path, (err, files) => {
-    files.forEach(file => {
-      filesList.push(file);
-    });
-    if (filesList.length > 0) {
-      chooseAction()
-    }
-  });
-}
-
-function renameFiles() {
-  inquirer
-    .prompt([
-      {
-        type: 'input',
-        name: 'path',
-        message: "Path (keep empty = current)",
-      },
-      {
-        type: 'input',
-        name: 'fileExtension',
-        message: "File extension to process ",
-      },
-      {
-        type: 'input',
-        name: 'newName',
-        message: "New name for all files.",
-      },
-    ])
-    .then(answers => {
-      // --- W A R N I N G ---
-      // const workPath = answers.path === '' ? './' : answers.path
-      const workPath = answers.path
-      fs.readdir(workPath, (err, files) => {
-        files.forEach((file, index) => {
-          const extensionToProcess = answers.fileExtension
-          const extension = file.match(/.[0-9a-z]+$/i)[0]
-          const newName = answers.newName
-          const oldFilePath = workPath + `/${file}`
-          const newFilePath = workPath + `/${newName}` + `${index}` + `${extension}`
-          if (extensionToProcess === extension) {
-            fs.rename(oldFilePath, newFilePath, (err) => {
-              console.log(
-                chalk.yellow.bold(file), 'has renamed to', chalk.yellow.bold(`${newName}` + `${index}` + `${extension}`)
-              )
-              if (err) throw err;
-            })
-          } else {
-            console.log(
-              chalk.white(file)
-            )
-          }
-        })
-      })
-    })
-}
-
 function isExtensionValid(file) {
   if (path.extname(file) === '.' || path.extname(file) === '') {
     return false
@@ -107,46 +46,89 @@ function isExtensionValid(file) {
   return true
 }
 
-function renameFile(file, newName = 'fs') {
+function isArgvValid(argv) {
+  argv.forEach((val, index) => {
+    if (typeof val !== 'string') {
+      throw new Error('one or more arguments is note a string');
+    }
+  });
+}
+
+function renameFile(file, newName = 'fs_') {
   console.log('file ', file, ' is renamed !')
 }
 
-function getFilesList(type, currentPath = process.cwd()) {
-  const filesToProcess = []
-  if (type === 'byExtension') {
-    fs.readdir(currentPath, (err, files) => {
-      files.forEach((file, index) => {
-        if (isExtensionValid(file)) {
-          if (path.extname(file) === argv[4]) {
-            console.log(file)
-            renameFile(file)
-          }
-        }
+function getFilesList() {
+  const filesInWorkDir = [];
+  fs.readdir(workDir, (err, files) => {
+    if (err) {
+      console.log('error in getFilesList');
+    } else {
+      files.forEach((file) => {
+        filesInWorkDir.push(file)
       })
-    })
-  }
+      filesList.push(...filesInWorkDir)
+      console.log('filesList', filesList)
+    }
+  })
 }
 
-function getAction(arg) {
-  console.log('getAction:', arg)
-  switch (arg) {
-    case '-re':
-      if (argv[2]) {
-        getFilesList('byExtension');
-      }
+const returnFlag = (flag) => {
+  let value = undefined;
+  argv.forEach((val, index) => {
+    if (val.includes(flag)) {
+      value = val.split('=').pop()
+    }
+  })
+  return value;
+}
+
+function deleteFiles() {
+  if (!filesList.length) {
+    console.log('there is no files in folder !')
+  }
+  switch (userArgv.filter) {
+    case 'extension':
+      console.log('delete files by extension');
+      break;
+    case 'name':
+      console.log('delete files by name');
       break;
     default:
-      console.log(`Sorry, we are out of ${arg}.`);
+      console.log('delete files by default (extension)')
+  }
+
+}
+
+function createProcess(action, filter = 'undefined') {
+  switch (action) {
+    case 'move':
+      break;
+    case 'rename':
+      break;
+    case 'delete':
+      deleteFiles()
+      break;
+    default:
+      console.log('action undefined !')
   }
 }
 
 function getArgv() {
-  console.log('dirname :')
-  console.log(argv[2])
-  argv.forEach((val, index) => {
-    console.log(`${index}: ${val}`);
-  });
-  getAction(argv[2])
-  console.log("Current directory:", process.cwd());
+  userArgv.action = returnFlag('action=')
+  userArgv.filter = returnFlag('filter=')
+  userArgv.name = returnFlag('name=')
+  userArgv.newName = returnFlag('newName')
+  userArgv.extension = returnFlag('extension')
+  userArgv.dirToMove = returnFlag('dirToMove=')
+
+  if (Object.values(userArgv).every(el => el === undefined)) {
+    throw new Error('There is no argments, please enter it !')
+  } else {
+    createProcess(userArgv.action, userArgv.filter)
+  }
 }
+
+console.log('START !!')
+// TODO : sync getFilesList = if getArgv && !filesList.lenght => createProcess()
 getArgv()

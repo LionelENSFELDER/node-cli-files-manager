@@ -5,7 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node ./index.js"
+    "dev": "node ./index.js",
+    "rename": "cd test && node ../index.mjs action=rename filter=extension name=toto newName=square extension=exe",
+    "move": "cd test && node ../index.mjs action=move filter=name name=tata pathToMove=~/Desktop/nameFolder",
+    "delete": "cd test && node ../index.mjs action=delete filter=extension extension=exe pathToMove=~/Desktop/nameFolder",
+    "error": "cd test && node ../index.mjs",
+    "autoClean": "cd test && node ../index.mjs action=autoclean path=~/Downloads/"
   },
   "repository": {
     "type": "git",
