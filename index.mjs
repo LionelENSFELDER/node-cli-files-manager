@@ -69,30 +69,21 @@ const returnFlag = (flag) => {
 }
 
 function deleteFiles(userArgv, files) {
-  switch (userArgv.filter) {
-    case 'extension':
-      console.log('delete files by extension');
-      files.forEach((file, index) => {
-        if (path.extname(file) === userArgv.extension) {
-          console.log('Delete => ', file)
-          fs.unlinkSync(file)
-        }
-      })
-      break;
-    case 'name':
-      console.log('delete files by name');
-      files.forEach((file, index) => {
-        console.log(path.basename(file, userArgv.extension))
-        // TODO : regex to match name on multiple same name (eg: file (1), file(2), file_1)
-        if (path.basename(file, path.extname(file)) === userArgv.name) {
-          console.log(`file ${file} with name : ${userArgv.name} will be deleted`)
-          fs.unlinkSync(file)
-        }
-      })
-      break;
-    default:
-      console.log('delete files by default (extension)')
-  }
+  files.forEach((file) => {
+    if (userArgv.filter === 'extension' && path.extname(file) === userArgv.extension) {
+      console.log('Delete => ', file)
+      fs.unlinkSync(file)
+    } else if (userArgv.filter === 'name') {
+      const regex = `/${userArgv.name}/g`;
+      if (
+        path.basename(file, path.extname(file)) === userArgv.name ||
+        file.includes(userArgv.name)
+      ) {
+        console.log('Delete => ', file)
+        fs.unlinkSync(file)
+      }
+    }
+  })
 }
 
 function createProcess(userArgv, files) {
