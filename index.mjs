@@ -4,11 +4,6 @@ import * as path from 'path'
 import { argv, cwd } from 'node:process'
 import process from 'node:process'
 
-// TODO : gather globals in one place 
-const workDir = process.cwd()
-var filesList = [];
-var userArgv = {}
-
 function removeDuplicates(array) {
   return array.filter((item, index) => array.indexOf(item) === index);
 }
@@ -58,19 +53,9 @@ function renameFile(file, newName = 'fs_') {
   console.log('file ', file, ' is renamed !')
 }
 
-function getFilesList() {
-  const filesInWorkDir = [];
-  fs.readdir(workDir, (err, files) => {
-    if (err) {
-      console.log('error in getFilesList');
-    } else {
-      files.forEach((file) => {
-        filesInWorkDir.push(file)
-      })
-      filesList.push(...filesInWorkDir)
-      console.log('filesList', filesList)
-    }
-  })
+function getFilesList(workDir) {
+  const files = fs.readdirSync(workDir)
+  return files
 }
 
 const returnFlag = (flag) => {
@@ -83,31 +68,41 @@ const returnFlag = (flag) => {
   return value;
 }
 
-function deleteFiles() {
-  if (!filesList.length) {
-    console.log('there is no files in folder !')
-  }
+function deleteFiles(userArgv, files) {
   switch (userArgv.filter) {
     case 'extension':
       console.log('delete files by extension');
+      files.forEach((file, index) => {
+        if (path.extname(file) === userArgv.extension) {
+          console.log('Delete => ', file)
+          fs.unlinkSync(file)
+        }
+      })
       break;
     case 'name':
       console.log('delete files by name');
+      files.forEach((file, index) => {
+        console.log(path.basename(file, userArgv.extension))
+        // TODO : regex to match name on multiple same name (eg: file (1), file(2), file_1)
+        if (path.basename(file, path.extname(file)) === userArgv.name) {
+          console.log(`file ${file} with name : ${userArgv.name} will be deleted`)
+          fs.unlinkSync(file)
+        }
+      })
       break;
     default:
       console.log('delete files by default (extension)')
   }
-
 }
 
-function createProcess(action, filter = 'undefined') {
-  switch (action) {
+function createProcess(userArgv, files) {
+  switch (userArgv.action) {
     case 'move':
       break;
     case 'rename':
       break;
     case 'delete':
-      deleteFiles()
+      deleteFiles(userArgv, files)
       break;
     default:
       console.log('action undefined !')
@@ -115,20 +110,31 @@ function createProcess(action, filter = 'undefined') {
 }
 
 function getArgv() {
-  userArgv.action = returnFlag('action=')
-  userArgv.filter = returnFlag('filter=')
-  userArgv.name = returnFlag('name=')
-  userArgv.newName = returnFlag('newName')
-  userArgv.extension = returnFlag('extension')
-  userArgv.dirToMove = returnFlag('dirToMove=')
+  const userEntries = {}
+  userEntries.action = returnFlag('action=')
+  userEntries.filter = returnFlag('filter=')
+  userEntries.name = returnFlag('name=')
+  userEntries.newName = returnFlag('newName')
+  userEntries.extension = returnFlag('extension')
+  userEntries.dirToMove = returnFlag('dirToMove=')
 
-  if (Object.values(userArgv).every(el => el === undefined)) {
-    throw new Error('There is no argments, please enter it !')
-  } else {
-    createProcess(userArgv.action, userArgv.filter)
-  }
+  return userEntries
 }
 
-console.log('START !!')
-// TODO : sync getFilesList = if getArgv && !filesList.lenght => createProcess()
-getArgv()
+function start() {
+  console.log('START !!');
+  const workDir = process.cwd();
+  const userArgv = { ...getArgv() };
+  const files = getFilesList(workDir);
+
+  if (Object.values(userArgv).every(el => el === undefined)) {
+    throw new Error('There is no arguments !')
+  }
+  if (files.length === 0) {
+    throw new Error('There is no files in folder !')
+  }
+
+  createProcess(userArgv, files);
+}
+
+start()

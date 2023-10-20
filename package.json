@@ -6,9 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "node ./index.js",
-    "rename": "cd test && node ../index.mjs action=rename filter=extension name=toto newName=square extension=exe",
-    "move": "cd test && node ../index.mjs action=move filter=name name=tata pathToMove=~/Desktop/nameFolder",
-    "delete": "cd test && node ../index.mjs action=delete filter=extension extension=exe pathToMove=~/Desktop/nameFolder",
+    "rename-by-extension": "cd test && node ../index.mjs action=rename filter=extension name=toto newName=square extension=exe",
+    "move-by-name": "cd test && node ../index.mjs action=move filter=name name=tata pathToMove=~/Desktop/nameFolder",
+    "delete-by-extension": "cd test && node ../index.mjs action=delete filter=extension extension=.webp",
+    "delete-by-name": "cd test && node ../index.mjs action=delete filter=name name=occ",
     "error": "cd test && node ../index.mjs",
     "autoClean": "cd test && node ../index.mjs action=autoclean path=~/Downloads/"
   },
