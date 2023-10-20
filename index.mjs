@@ -86,17 +86,40 @@ function deleteFiles(userArgv, files) {
   })
 }
 
+function uppercase(str) {
+  if (typeof str === 'string') {
+    console.log('uppercase: ', str.toUpperCase())
+    // return str.toUppercase();
+  }
+}
+
+function moveFiles(userArgv, files) {
+  // TODO: issue with uppercase extensions !!!!!!
+  const filterUppercase = userArgv.filter.uppercase();
+  files.forEach((file) => {
+    console.log('file :', file)
+    if (userArgv.filter === 'extension' && path.extname(file) === userArgv.extension) {
+      console.log(file, 'moved')
+      if (uppercase(path.extname(file)) === uppercase(userArgv.extension)
+      ) {
+        console.log(file, 'moved')
+      }
+    }
+  })
+}
+
 function createProcess(userArgv, files) {
   switch (userArgv.action) {
     case 'move':
+      moveFiles(userArgv, files);
       break;
     case 'rename':
       break;
     case 'delete':
-      deleteFiles(userArgv, files)
+      deleteFiles(userArgv, files);
       break;
     default:
-      console.log('action undefined !')
+      console.log('action undefined !');
   }
 }
 
