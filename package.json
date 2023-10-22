@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node ./index.js",
     "rename-by-extension": "cd test && node ../index.mjs action=rename filter=extension extension=.exe",
-    "delete-by-extension": "cd test && node ../index.mjs action=delete filter=extension extension=.exe",
+    "delete-by-extension": "cd test && node ../index.mjs action=delete filter=extension extension=ini",
     "delete-by-name": "cd test && node ../index.mjs action=delete filter=name name=rufus",
     "error": "cd test && node ../index.mjs",
     "move-by-name": "cd test && node ../index.mjs action=move filter=name name=tata pathToMove=~/Desktop/nameFolder",

@@ -68,9 +68,17 @@ const returnFlag = (flag) => {
   return value;
 }
 
+function caseInsensitiveRegExp(str) {
+  const strLowerCase = str.toLowerCase();
+  const regExp = new RegExp(`\\.${strLowerCase}$`, 'i') // case insensitive extension matching
+  return regExp
+}
+
+
 function deleteFiles(userArgv, files) {
+  const regExp = caseInsensitiveRegExp(userArgv.extension)
   files.forEach((file) => {
-    if (userArgv.filter === 'extension' && path.extname(file) === userArgv.extension) {
+    if (userArgv.filter === 'extension' && regExp.test(file)) {
       console.log('Delete => ', file)
       fs.unlinkSync(file)
     } else if (userArgv.filter === 'name') {
@@ -94,7 +102,9 @@ function uppercase(str) {
 }
 
 function moveFiles(userArgv, files) {
-  // TODO: issue with uppercase extensions !!!!!!
+  // TODO: issue with uppercase extensions
+  const regExp = caseInsensitiveRegExp(userArgv.name)
+  // TODO: if folder doesn't exist create it
   const filterUppercase = userArgv.filter.uppercase();
   files.forEach((file) => {
     console.log('file :', file)
