@@ -10,8 +10,8 @@
     "delete-by-extension": "cd test && node ../index.mjs action=delete filter=extension extension=ini",
     "delete-by-name": "cd test && node ../index.mjs action=delete filter=name name=rufus",
     "error": "cd test && node ../index.mjs",
-    "move-by-name": "cd test && node ../index.mjs action=move filter=name name=tata pathToMove=~/Desktop/nameFolder",
-    "move-by-extension": "cd test && node ../index.mjs action=move filter=extension extension=.jpg pathToMove=~/Desktop/dev/node-cli-files-manager/test/jpg/",
+    "move-by-name": "cd test && node ../index.mjs action=move filter=name name=tata destination=C:/Users/ensfe/Desktop/dev/node-cli-files-manager/test/tata",
+    "move-by-extension": "cd test && node ../index.mjs action=move filter=extension extension=exe destination=C:/Users/ensfe/Desktop/dev/node-cli-files-manager/test/oc",
     "autoClean": "cd test && node ../index.mjs action=autoclean path=~/Downloads/"
   },
   "repository": {

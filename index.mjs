@@ -70,7 +70,7 @@ const returnFlag = (flag) => {
 
 function caseInsensitiveRegExp(str) {
   const strLowerCase = str.toLowerCase();
-  const regExp = new RegExp(`\\.${strLowerCase}$`, 'i') // case insensitive extension matching
+  const regExp = new RegExp(`\\.${strLowerCase}$`, 'i') // case insensitive matching
   return regExp
 }
 
@@ -83,8 +83,7 @@ function deleteFiles(userArgv, files) {
       fs.unlinkSync(file)
     } else if (userArgv.filter === 'name') {
       const regex = `/${userArgv.name}/g`;
-      if (
-        path.basename(file, path.extname(file)) === userArgv.name ||
+      if (path.basename(file, path.extname(file)) === userArgv.name ||
         file.includes(userArgv.name)
       ) {
         console.log('Delete => ', file)
@@ -101,21 +100,55 @@ function uppercase(str) {
   }
 }
 
+function checkFolder(folder) {
+  const folderPath = path.resolve(folder);
+  if (fs.existsSync(folderPath)) {
+    return folderPath;
+  } else {
+    fs.mkdirSync(folderPath, { recursive: true }); // recursive: true will create parent folders if needed
+    return folderPath;
+  }
+}
+
 function moveFiles(userArgv, files) {
-  // TODO: issue with uppercase extensions
-  const regExp = caseInsensitiveRegExp(userArgv.name)
-  // TODO: if folder doesn't exist create it
-  const filterUppercase = userArgv.filter.uppercase();
+  // ugly ⬇️⬇️⬇️⬇️
+  const regExp = userArgv.extension !== undefined ? caseInsensitiveRegExp(userArgv.extension) : null;
+  // ugly ⬆️⬆️⬆️⬆️
+  const destination = checkFolder(userArgv.destination);
+  if (destination === null) {
+    console.error(`Error checking/creating folder: ${error.message}`);
+    return
+  }
+
   files.forEach((file) => {
-    console.log('file :', file)
-    if (userArgv.filter === 'extension' && path.extname(file) === userArgv.extension) {
-      console.log(file, 'moved')
-      if (uppercase(path.extname(file)) === uppercase(userArgv.extension)
+    if (userArgv.filter === 'extension' && regExp.test(file)) {
+      const sourceFilePath = file;
+      const destinationFilePath = path.join(destination, path.basename(file));
+      fs.rename(sourceFilePath, destinationFilePath, (err) => {
+        if (err) {
+          console.error(`Error moving the file: ${err}`);
+        } else {
+          console.log(`${file} moved to ${destination}`);
+        }
+      });
+    } else if (userArgv.filter === 'name') {
+      if (
+        path.basename(file, path.extname(file)) === userArgv.name ||
+        file.includes(userArgv.name)
       ) {
-        console.log(file, 'moved')
+        const sourceFilePath = file;
+        const destinationFilePath = path.join(destination, path.basename(file));
+        fs.rename(sourceFilePath, destinationFilePath, (err) => {
+          if (err) {
+            console.error(`Error moving the file: ${err}`);
+          } else {
+            console.log(`${file} moved to ${destination}`);
+          }
+        });
       }
     }
-  })
+  });
+
 }
 
 function createProcess(userArgv, files) {
@@ -140,7 +173,7 @@ function getArgv() {
   userEntries.name = returnFlag('name=')
   userEntries.newName = returnFlag('newName')
   userEntries.extension = returnFlag('extension')
-  userEntries.dirToMove = returnFlag('dirToMove=')
+  userEntries.destination = returnFlag('destination=')
 
   return userEntries
 }
